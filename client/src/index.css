@@ -588,8 +588,33 @@ tbody tr:hover td { background: var(--surface2); }
     display: none;
   }
 
-  /* Login page: stack panels */
+  /* Login page: show condensed header instead of hiding left panel */
   .login-left {
+    min-height: 0;
+    flex: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* On very small screens collapse the left panel to a compact header */
+  .login-left .login-left-inner {
+    padding: 24px 20px;
+  }
+
+  .login-left .login-headline {
+    display: none;
+  }
+
+  .login-left .login-sub {
+    display: none;
+  }
+
+  .login-left .login-features {
+    display: none;
+  }
+
+  .login-left .login-footer {
     display: none;
   }
 }

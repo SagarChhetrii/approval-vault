@@ -32,8 +32,8 @@ export default function Login() {
   return (
     <div style={s.page}>
       {/* Left panel */}
-      <div style={s.left}>
-        <div style={s.leftInner}>
+      <div style={s.left} className="login-left">
+        <div style={s.leftInner} className="login-left-inner">
           <div style={s.logoRow}>
             <div style={s.logoIcon}>
               <i className="fa-solid fa-vault" style={{color:"var(--accent)",fontSize:18}} />
@@ -43,10 +43,10 @@ export default function Login() {
           </div>
 
           <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center"}}>
-            <h1 style={s.headline}>Secure Client<br/>Approval Portal</h1>
-            <p style={s.sub}>Turn every client approval into a cryptographically signed, timestamped, immutable record — no more "I never said that."</p>
+            <h1 style={s.headline} className="login-headline">Secure Client<br/>Approval Portal</h1>
+            <p style={s.sub} className="login-sub">Turn every client approval into a cryptographically signed, timestamped, immutable record — no more "I never said that."</p>
 
-            <div style={s.features}>
+            <div style={s.features} className="login-features">
               {FEATURES.map(({icon,title,desc}) => (
                 <div key={title} style={s.feat}>
                   <div style={s.featIcon}>
@@ -61,7 +61,7 @@ export default function Login() {
             </div>
           </div>
 
-          <div style={s.leftFooter}>
+          <div style={s.leftFooter} className="login-footer">
             <span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text3)"}}>© 2025 ApprovalVault · Built for hackathon</span>
           </div>
         </div>

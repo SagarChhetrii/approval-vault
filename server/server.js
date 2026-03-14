@@ -35,6 +35,7 @@ app.use('/api', projectRoutes);
 
 /* ── Global error handler ── */
 app.use((err, req, res, next) => {  // eslint-disable-line no-unused-vars
+  if (res.headersSent) { return next(err); }
   console.error(err.stack || err.message);
   const status = err.status || 500;
   res.status(status).json({ message: err.message || 'Internal server error' });

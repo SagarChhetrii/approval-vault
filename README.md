@@ -59,7 +59,7 @@ Then log in at `http://localhost:3000/login`.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/SagarChhetrii/approval-vault.git
+git clone https://github.com/<your-username>/approval-vault.git
 cd approval-vault
 
 # 2. Create a root .env file with production secrets
