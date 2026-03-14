@@ -10,12 +10,36 @@ const projectRoutes = require('./routes/projectRoutes');
 
 const app = express();
 
-app.use(cors());
+/* ── CORS ── */
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim());
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow server-to-server requests (no origin) and listed origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', projectRoutes);
+
+/* ── Global error handler ── */
+app.use((err, req, res, next) => {  // eslint-disable-line no-unused-vars
+  if (res.headersSent) { return next(err); }
+  console.error(err.stack || err.message);
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message || 'Internal server error' });
+});
 
 mongoose
   .connect(MONGO_URI)

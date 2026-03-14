@@ -1,42 +1,37 @@
-# ApprovalVault — Setup Guide
+# ApprovalVault — Setup & Deployment Guide
 
 ## Folder Structure
 ```
-approval-portal/
-├── server/   ← Node.js + Express backend
-└── client/   ← React (Vite) frontend
+approval-vault/
+├── server/            ← Node.js + Express backend
+├── client/            ← React (Vite) frontend
+└── docker-compose.yml ← Production Docker orchestration
 ```
 
 ---
 
-## 1. Backend Setup
+## Quick Start (Local Development)
+
+### 1. Backend Setup
 
 ```bash
 cd server
 npm install
 cp .env.example .env
-# Edit .env — add your MongoDB Atlas URI
+# Edit .env — add your MongoDB Atlas URI and a strong JWT_SECRET
 npm run dev        # starts on http://localhost:5000
 ```
 
-**Install deps:** express, mongoose, bcryptjs, jsonwebtoken, multer, cors, dotenv
-
----
-
-## 2. Frontend Setup
+### 2. Frontend Setup
 
 ```bash
 cd client
 npm install
-# .env already set to http://localhost:5000/api
-npm run dev        # starts on http://localhost:3000
+cp .env.example .env   # optional — Vite proxy handles /api in dev
+npm run dev            # starts on http://localhost:3000
 ```
 
----
-
-## 3. Create your first admin user
-
-Use any REST client (Postman, Thunder Client, curl):
+### 3. Create Your First Admin User
 
 ```
 POST http://localhost:5000/api/auth/register
@@ -54,10 +49,75 @@ Then log in at `http://localhost:3000/login`.
 
 ---
 
-## Core Flow
+## Deployment with Docker
 
-1. **Admin logs in** → creates a project (also creates client account)
-2. **Admin uploads file** → SHA-256 hash auto-generated + stored
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed
+- MongoDB Atlas cluster (or any accessible MongoDB instance)
+
+### Steps
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/<your-username>/approval-vault.git
+cd approval-vault
+
+# 2. Create a root .env file with production secrets
+cat > .env << 'EOF'
+MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/approvalportal
+JWT_SECRET=your_very_long_random_secret_here
+CLIENT_ORIGIN=http://your-domain.com
+EOF
+
+# 3. Build and start all containers
+docker-compose up --build -d
+
+# 4. Check running containers
+docker-compose ps
+```
+
+The app will be available at:
+- **Frontend**: `http://localhost` (port 80)
+- **Backend API**: `http://localhost:5000`
+
+### Stop / Restart
+
+```bash
+docker-compose down        # stop and remove containers
+docker-compose restart     # restart all services
+docker-compose logs -f     # follow logs
+```
+
+### Uploaded Files
+
+File uploads are stored in a Docker named volume (`uploads_data`) so they persist across container restarts.
+
+---
+
+## Environment Variables
+
+### Server (`server/.env`)
+
+| Variable        | Required | Description |
+|-----------------|----------|-------------|
+| `MONGO_URI`     | ✅       | MongoDB connection string |
+| `JWT_SECRET`    | ✅       | Secret key for JWT signing (use a long random string) |
+| `PORT`          | —        | Server port (default: `5000`) |
+| `NODE_ENV`      | —        | `development` or `production` |
+| `CLIENT_ORIGIN` | —        | Frontend origin for CORS (default: `http://localhost:3000`) |
+
+### Client (`client/.env`)
+
+| Variable      | Description |
+|---------------|-------------|
+| `VITE_API_URL`| Backend API base URL (default: proxied via Vite dev server) |
+
+---
+
+## Core Workflow
+
+1. **Admin logs in** → creates a project (also creates a client account)
+2. **Admin uploads file** → SHA-256 hash auto-generated and stored
 3. **Client logs in** → sees their project, reviews the file
 4. **Client approves** → version locked, approval certificate generated
 5. **Both can view** the Approval Certificate with full cryptographic proof
@@ -75,6 +135,7 @@ Then log in at `http://localhost:3000/login`.
 | Immutable locking | `locked: true` on Version doc after approval |
 | Audit trail | Every action logged to AuditLog collection |
 | IP capture | Captured at approval time from request headers |
+| CORS | Configurable via `CLIENT_ORIGIN` env var |
 
 ---
 
@@ -96,3 +157,4 @@ Then log in at `http://localhost:3000/login`.
 | GET | /api/versions/:id/comments | Any | Get comments |
 | POST | /api/versions/:id/approve | Client | Approve + lock version |
 | GET | /api/versions/:id/approval | Any | Get approval certificate |
+
