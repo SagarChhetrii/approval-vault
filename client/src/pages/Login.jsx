@@ -22,6 +22,13 @@ export default function Login() {
     finally { setLoading(false); }
   }
 
+  const FEATURES = [
+    { icon: "fa-solid fa-fingerprint",      title: "SHA-256 File Fingerprinting",    desc: "Every file gets a unique cryptographic fingerprint" },
+    { icon: "fa-solid fa-lock",             title: "Immutable Approval Locking",     desc: "Approved files cannot be modified or tampered with" },
+    { icon: "fa-solid fa-clipboard-list",   title: "Full Audit Trail",               desc: "Every action logged with timestamps & user attribution" },
+    { icon: "fa-solid fa-shield-halved",    title: "AES-256 Encrypted Sessions",     desc: "Bank-grade security for all your approvals" },
+  ];
+
   return (
     <div style={s.page}>
       {/* Left panel */}
@@ -29,11 +36,7 @@ export default function Login() {
         <div style={s.leftInner}>
           <div style={s.logoRow}>
             <div style={s.logoIcon}>
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                <rect x="1" y="3" width="14" height="11" rx="2" stroke="var(--accent)" strokeWidth="1.5"/>
-                <path d="M5 3V2a3 3 0 016 0v1" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="8" cy="9" r="1.5" fill="var(--accent)"/>
-              </svg>
+              <i className="fa-solid fa-vault" style={{color:"var(--accent)",fontSize:18}} />
             </div>
             <span style={s.logoText}>Vault</span>
             <span style={s.e2eTag}>E2E ENCRYPTED</span>
@@ -44,14 +47,11 @@ export default function Login() {
             <p style={s.sub}>Turn every client approval into a cryptographically signed, timestamped, immutable record — no more "I never said that."</p>
 
             <div style={s.features}>
-              {[
-                ["🔐","SHA-256 File Fingerprinting","Every file gets a unique cryptographic fingerprint"],
-                ["🔒","Immutable Approval Locking","Approved files cannot be modified or tampered with"],
-                ["📋","Full Audit Trail","Every action logged with timestamps & user attribution"],
-                ["🛡","AES-256 Encrypted Sessions","Bank-grade security for all your approvals"],
-              ].map(([icon,title,desc]) => (
+              {FEATURES.map(({icon,title,desc}) => (
                 <div key={title} style={s.feat}>
-                  <div style={s.featIcon}>{icon}</div>
+                  <div style={s.featIcon}>
+                    <i className={icon} style={{color:"var(--accent)",fontSize:15}} />
+                  </div>
                   <div>
                     <div style={{fontSize:13,fontWeight:600,marginBottom:2}}>{title}</div>
                     <div style={{fontSize:12,color:"var(--text3)",fontFamily:"var(--mono)"}}>{desc}</div>
@@ -78,30 +78,36 @@ export default function Login() {
           <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:16}}>
             <div>
               <label className="field-label">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                required
-                style={{fontSize:14}}
-              />
+              <div className="input-group">
+                <i className="fa-solid fa-envelope input-icon" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  required
+                  style={{fontSize:14}}
+                />
+              </div>
             </div>
             <div>
               <label className="field-label">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                style={{fontSize:14}}
-              />
+              <div className="input-group">
+                <i className="fa-solid fa-key input-icon" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  style={{fontSize:14}}
+                />
+              </div>
             </div>
 
             {error && (
-              <div style={{background:"var(--red-dim)",border:"1px solid rgba(255,92,92,0.25)",borderRadius:8,padding:"10px 14px",color:"var(--red)",fontSize:13,fontFamily:"var(--mono)"}}>
-                ⚠ {error}
+              <div style={{background:"var(--red-dim)",border:"1px solid rgba(255,92,92,0.25)",borderRadius:8,padding:"10px 14px",color:"var(--red)",fontSize:13,fontFamily:"var(--mono)",display:"flex",alignItems:"center",gap:8}}>
+                <i className="fa-solid fa-triangle-exclamation" /> {error}
               </div>
             )}
 
@@ -113,17 +119,21 @@ export default function Login() {
             >
               {loading ? (
                 <span style={{display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{width:14,height:14,borderRadius:"50%",border:"2px solid rgba(7,10,14,0.3)",borderTopColor:"#070a0e",animation:"spin 0.6s linear infinite"}} />
+                  <i className="fa-solid fa-spinner fa-spin" />
                   Signing in…
                 </span>
-              ) : "Sign In →"}
+              ) : (
+                <span style={{display:"flex",alignItems:"center",gap:8}}>
+                  Sign In <i className="fa-solid fa-arrow-right" />
+                </span>
+              )}
             </button>
           </form>
 
           {/* Demo credentials */}
           <div style={s.demoBox}>
             <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-              <div style={{width:5,height:5,borderRadius:"50%",background:"var(--accent)"}} />
+              <i className="fa-solid fa-circle-info" style={{color:"var(--accent)",fontSize:10}} />
               <span style={{fontSize:10,fontFamily:"var(--mono)",fontWeight:700,color:"var(--accent)",letterSpacing:"0.1em"}}>DEMO CREDENTIALS</span>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -143,15 +153,13 @@ export default function Login() {
           </div>
         </div>
       </div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
 const s = {
-  page: { display:"flex",minHeight:"100vh" },
-  left: { flex:1,background:"var(--sidebar-bg)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",overflow:"hidden",position:"relative" },
+  page: { display:"flex",minHeight:"100vh",flexWrap:"wrap" },
+  left: { flex:1,minWidth:280,background:"var(--sidebar-bg)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",overflow:"hidden",position:"relative" },
   leftInner: { display:"flex",flexDirection:"column",height:"100%",padding:"48px 52px" },
   logoRow: { display:"flex",alignItems:"center",gap:10,marginBottom:0 },
   logoIcon: { width:40,height:40,borderRadius:10,background:"var(--accent-dim)",border:"1px solid rgba(181,242,61,0.3)",display:"flex",alignItems:"center",justifyContent:"center" },
@@ -161,7 +169,7 @@ const s = {
   sub: { color:"var(--text2)",fontSize:15,lineHeight:1.75,marginBottom:40,maxWidth:440 },
   features: { display:"flex",flexDirection:"column",gap:16 },
   feat: { display:"flex",alignItems:"flex-start",gap:14 },
-  featIcon: { width:36,height:36,borderRadius:9,background:"var(--surface)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,marginTop:1 },
+  featIcon: { width:36,height:36,borderRadius:9,background:"var(--surface)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1 },
   leftFooter: { marginTop:"auto",paddingTop:40 },
   right: { width:480,display:"flex",alignItems:"center",justifyContent:"center",padding:48 },
   formWrap: { width:"100%",maxWidth:400 },

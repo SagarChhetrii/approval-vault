@@ -7,18 +7,19 @@ export default function Sidebar({ counts = {} }) {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef();
 
   const NAV_MAIN = [
-    { path: "/",          icon: DashIcon,    label: "Dashboard",   count: counts.pending },
-    { path: "/projects",  icon: DocIcon,     label: "Documents",   count: counts.projects },
-    { path: "/approvals", icon: ApvIcon,     label: "Approvals",   count: counts.approvals },
-    { path: "/files",     icon: CmtIcon,     label: "Comments",    count: counts.comments },
+    { path: "/",          icon: "fa-solid fa-table-cells-large", label: "Dashboard",   count: counts.pending },
+    { path: "/projects",  icon: "fa-solid fa-file-lines",        label: "Documents",   count: counts.projects },
+    { path: "/approvals", icon: "fa-solid fa-circle-check",      label: "Approvals",   count: counts.approvals },
+    { path: "/files",     icon: "fa-solid fa-message",           label: "Comments",    count: counts.comments },
   ];
   const NAV_COMPLIANCE = [
-    { path: "/audit",   icon: AuditIcon,   label: "Audit Trail" },
-    { path: "/clients", icon: RptIcon,     label: "Reports" },
-    { path: "/profile", icon: ProfileIcon, label: "My Profile" },
+    { path: "/audit",   icon: "fa-solid fa-clock-rotate-left", label: "Audit Trail" },
+    { path: "/clients", icon: "fa-solid fa-chart-bar",         label: "Reports" },
+    { path: "/profile", icon: "fa-solid fa-user",              label: "My Profile" },
   ];
 
   useEffect(() => {
@@ -27,6 +28,9 @@ export default function Sidebar({ counts = {} }) {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
+  /* Close mobile sidebar on route change */
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
+
   const isActive = (p) => pathname === p || (p !== "/" && pathname.startsWith(p));
   const COLORS = ["#4a9eff","#a78bfa","#2dd4a0","#f5a623","#ff5c5c"];
   const avatarColor = COLORS[(user.name?.charCodeAt(0) || 0) % COLORS.length];
@@ -34,15 +38,19 @@ export default function Sidebar({ counts = {} }) {
 
   return (
     <>
-      <aside style={S.sidebar}>
+      {/* Mobile hamburger button */}
+      <button className="hamburger-btn" onClick={() => setMobileOpen(v => !v)} aria-label="Toggle menu">
+        <i className={`fa-solid ${mobileOpen ? "fa-xmark" : "fa-bars"}`} />
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
+
+      <aside className={`sidebar${mobileOpen ? " sidebar-open" : ""}`}>
         {/* Logo */}
         <div style={S.logo} onClick={() => navigate("/")}>
           <div style={S.logoIcon}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="1" y="3" width="14" height="11" rx="2" stroke="var(--accent)" strokeWidth="1.5"/>
-              <path d="M5 3V2a3 3 0 016 0v1" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="8" cy="9" r="1.5" fill="var(--accent)"/>
-            </svg>
+            <i className="fa-solid fa-vault" style={{color:"var(--accent)",fontSize:14}} />
           </div>
           <span style={S.logoText}>Vault</span>
           <span style={S.e2eTag}>E2E</span>
@@ -64,7 +72,7 @@ export default function Sidebar({ counts = {} }) {
         <div style={S.bottom} ref={menuRef}>
           {/* Security badge */}
           <div style={S.securityBadge}>
-            <div style={{width:6,height:6,borderRadius:"50%",background:"var(--accent)",boxShadow:"0 0 6px var(--accent)",animation:"pulse 2s infinite"}} />
+            <i className="fa-solid fa-shield-halved" style={{color:"var(--accent)",fontSize:10,filter:"drop-shadow(0 0 4px var(--accent))"}} />
             <span style={{fontSize:10,fontFamily:"var(--mono)",color:"var(--accent)"}}>AES-256 Encrypted</span>
           </div>
 
@@ -88,12 +96,12 @@ export default function Sidebar({ counts = {} }) {
 
               <div className="divider" style={{margin:"4px 0"}} />
 
-              <MenuItem icon="👤" label="View Profile" onClick={() => { setShowMenu(false); navigate("/profile"); }} />
-              <MenuItem icon="✏️" label="Edit Profile" onClick={() => { setShowMenu(false); setShowEditModal(true); }} />
+              <MenuItem icon="fa-solid fa-user" label="View Profile" onClick={() => { setShowMenu(false); navigate("/profile"); }} />
+              <MenuItem icon="fa-solid fa-pen" label="Edit Profile" onClick={() => { setShowMenu(false); setShowEditModal(true); }} />
 
               <div className="divider" style={{margin:"4px 0"}} />
 
-              <MenuItem icon="🚪" label="Sign Out" danger onClick={() => { localStorage.clear(); navigate("/login"); }} />
+              <MenuItem icon="fa-solid fa-right-from-bracket" label="Sign Out" danger onClick={() => { localStorage.clear(); navigate("/login"); }} />
             </div>
           )}
 
@@ -107,9 +115,7 @@ export default function Sidebar({ counts = {} }) {
               <div style={{fontSize:13,fontWeight:600,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name || "User"}</div>
               <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"capitalize"}}>{user.role}</div>
             </div>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{flexShrink:0,color:"var(--text3)",transition:"transform 0.2s",transform:showMenu?"rotate(180deg)":"rotate(0deg)"}}>
-              <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <i className="fa-solid fa-chevron-up" style={{flexShrink:0,color:"var(--text3)",fontSize:10,transition:"transform 0.2s",transform:showMenu?"rotate(0deg)":"rotate(180deg)"}} />
           </div>
         </div>
       </aside>
@@ -120,10 +126,9 @@ export default function Sidebar({ counts = {} }) {
 }
 
 function NavItem({ item, active, onClick }) {
-  const Icon = item.icon;
   return (
     <button onClick={onClick} style={{...S.navBtn, ...(active ? S.navActive : {})}}>
-      <span style={{flexShrink:0,opacity:active?1:0.6}}><Icon active={active} /></span>
+      <i className={item.icon} style={{flexShrink:0,fontSize:13,width:16,textAlign:"center",opacity:active?1:0.55}} />
       <span style={{flex:1,textAlign:"left"}}>{item.label}</span>
       {item.count > 0 && <span className="nav-count">{item.count}</span>}
     </button>
@@ -139,7 +144,7 @@ function MenuItem({ icon, label, onClick, danger }) {
       onMouseLeave={() => setHov(false)}
       onClick={onClick}
     >
-      <span style={{fontSize:14}}>{icon}</span>
+      <i className={icon} style={{fontSize:13,width:16,textAlign:"center"}} />
       <span>{label}</span>
     </button>
   );
@@ -166,7 +171,9 @@ function EditProfileModal({ user, onClose }) {
         <div style={{textAlign:"center",marginBottom:26}}>
           <div style={{position:"relative",display:"inline-block",marginBottom:14}}>
             <div className="avatar" style={{width:72,height:72,background:avatarColor,fontSize:24,color:"#070a0e",margin:"0 auto"}}>{initials}</div>
-            <div style={{position:"absolute",bottom:2,right:2,width:16,height:16,borderRadius:"50%",background:"var(--accent)",border:"3px solid var(--surface)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,color:"#070a0e"}}>✏</div>
+            <div style={{position:"absolute",bottom:2,right:2,width:20,height:20,borderRadius:"50%",background:"var(--accent)",border:"3px solid var(--surface)",display:"flex",alignItems:"center",justifyContent:"center",color:"#070a0e"}}>
+              <i className="fa-solid fa-pen" style={{fontSize:8}} />
+            </div>
           </div>
           <div className="modal-title">Edit Profile</div>
           <div style={{fontSize:13,color:"var(--text2)"}}>Update your account details</div>
@@ -191,13 +198,15 @@ function EditProfileModal({ user, onClose }) {
 
           {saved && (
             <div style={{background:"var(--green-dim)",border:"1px solid rgba(45,212,160,0.3)",borderRadius:8,padding:"10px 14px",color:"var(--green)",fontSize:12,fontFamily:"var(--mono)",textAlign:"center"}}>
-              ✓ Profile updated!
+              <i className="fa-solid fa-circle-check" style={{marginRight:6}} />Profile updated!
             </div>
           )}
 
           <div style={{display:"flex",gap:10,marginTop:2}}>
             <button type="button" className="btn btn-ghost" style={{flex:1}} onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-accent" style={{flex:1}}>{saved ? "✓ Saved!" : "Save Changes"}</button>
+            <button type="submit" className="btn btn-accent" style={{flex:1}}>
+              {saved ? <><i className="fa-solid fa-check" /> Saved!</> : "Save Changes"}
+            </button>
           </div>
         </form>
       </div>
@@ -205,18 +214,8 @@ function EditProfileModal({ user, onClose }) {
   );
 }
 
-/* ── Icons ── */
-function DashIcon({active})    { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill={active?"var(--accent)":"var(--text2)"}/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5" fill={active?"var(--accent)":"var(--text2)"}/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5" fill={active?"var(--accent)":"var(--text2)"}/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" fill={active?"var(--accent)":"var(--text2)"}/></svg>; }
-function DocIcon({active})     { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="1" width="9" height="13" rx="1.5" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5"/><line x1="4.5" y1="5" x2="10.5" y2="5" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.2"/><line x1="4.5" y1="8" x2="10.5" y2="8" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.2"/><line x1="4.5" y1="11" x2="8" y2="11" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.2"/></svg>; }
-function ApvIcon({active})     { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="13" height="13" rx="2" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5"/><polyline points="4,7.5 6.5,10 11,5" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5" strokeLinecap="round"/></svg>; }
-function CmtIcon({active})     { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 2h11a1 1 0 011 1v7a1 1 0 01-1 1H5l-3 3V3a1 1 0 011-1z" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5"/></svg>; }
-function AuditIcon({active})   { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5"/><polyline points="7.5,4 7.5,8 10,9.5" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5" strokeLinecap="round"/></svg>; }
-function RptIcon({active})     { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="8" width="3" height="6" rx="1" fill={active?"var(--accent)":"var(--text2)"}/><rect x="6" y="5" width="3" height="9" rx="1" fill={active?"var(--accent)":"var(--text2)"}/><rect x="11" y="2" width="3" height="12" rx="1" fill={active?"var(--accent)":"var(--text2)"}/></svg>; }
-function ProfileIcon({active}) { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="2.5" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5"/><path d="M2.5 13c0-2.76 2.24-4 5-4s5 1.24 5 4" stroke={active?"var(--accent)":"var(--text2)"} strokeWidth="1.5" strokeLinecap="round"/></svg>; }
-
 /* ── Styles ── */
 const S = {
-  sidebar: { position:"fixed",top:0,left:0,width:"var(--sidebar-w)",height:"100vh",background:"var(--sidebar-bg)",borderRight:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:100 },
   logo: { display:"flex",alignItems:"center",gap:10,padding:"18px 16px",borderBottom:"1px solid var(--border)",cursor:"pointer",flexShrink:0 },
   logoIcon: { width:34,height:34,borderRadius:9,background:"var(--accent-dim)",border:"1px solid rgba(181,242,61,0.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 },
   logoText: { fontSize:17,fontWeight:800,color:"var(--text)",letterSpacing:"-0.02em" },
