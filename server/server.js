@@ -3,7 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const { MONGO_URI, PORT } = require('./config');
+const { MONGO_URI, PORT, NODE_ENV, ENABLE_DEMO_USERS } = require('./config');
+const { seedDemoUsers } = require('./utils/seedDemoUsers');
 
 const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
@@ -43,8 +44,13 @@ app.use((err, req, res, next) => {  // eslint-disable-line no-unused-vars
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+
+    if (NODE_ENV !== 'production' && ENABLE_DEMO_USERS) {
+      await seedDemoUsers();
+    }
+
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => console.error('❌ DB connection error:', err));
